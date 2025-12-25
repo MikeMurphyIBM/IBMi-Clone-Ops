@@ -52,11 +52,11 @@ readonly API_VERSION="2024-02-28"
 # LPAR Configuration
 readonly PRIMARY_LPAR="murphy-prod"
 readonly PRIMARY_INSTANCE_ID="fea64706-1929-41c9-a761-68c43a8f29cc"
-readonly SECONDARY_LPAR="murphy-prod-clone91"
+readonly SECONDARY_LPAR="murphy-prod-clone88"
 
 # Network Configuration
 readonly SUBNET_ID="9b9c414e-aa95-41aa-8ed2-40141e0c42fd"
-readonly PRIVATE_IP="192.168.10.91"
+readonly PRIVATE_IP="192.168.10.88"
 readonly PUBLIC_SUBNET_NAME="public-net-$(date +"%Y%m%d%H%M%S")"
 readonly KEYPAIR_NAME="murph2"
 
@@ -373,15 +373,11 @@ ssh -i "$VSI_KEY_FILE" \
        -o StrictHostKeyChecking=no \
        -o UserKnownHostsFile=/dev/null \
        murphy@192.168.0.109 \
-       'system \"CHGTCPIFC INTNETADR('\''192.168.0.109'\'') AUTOSTART(*NO)\"; \
-        sleep 5; \
-        system \"CALL PGM(QSYS/QAENGCHG) PARM(*ENABLECI)\"; \
-        sleep 5; \
-        system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)\"; \
-        sleep 30; \
-        system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*SUSPEND) SSPTIMO(120)\"'" || true
+       'rm -f /QOpenSys/var/lib/cloud/instance/boot-finished; \
+        rm -f /QOpenSys/var/lib/cloud/instance/instance-id; \
+        system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)\"'" || true
 
-echo "  ✓ IBMi preparation commands completed - ASP suspended for 120 seconds"
+echo "  ✓ IBMi preparation commands completed"
 echo ""
 
 echo "------------------------------------------------------------------------"
@@ -918,8 +914,7 @@ echo "------------------------------------------------------------------------"
 echo " Stage IX Complete: Boot volume attached and marked as bootable"
 echo "------------------------------------------------------------------------"
 echo ""
-echo "Pausing for 5 minutes to ensure volumes are attached and ready for operations"
-sleep 300
+
 
 ################################################################################
 # STAGE X: CONFIGURE BOOT MODE
@@ -1091,10 +1086,11 @@ ssh -i "$VSI_KEY_FILE" \
        -o StrictHostKeyChecking=no \
        -o UserKnownHostsFile=/dev/null \
        murphy@192.168.0.109 \
-       'system \"CHGTCPIFC INTNETADR('\''192.168.0.109'\'') AUTOSTART(*YES)\"; \
+       'echo primary > /QOpenSys/var/lib/cloud/instance/instance-id; \
+        touch /QOpenSys/var/lib/cloud/instance/boot-finished; \
         system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)\"'" || true
 
-echo "  ✓ TCP/IP autostart enabled and ASP flushed to disk"
+echo "  ✓ Primary LPAR returned to pre-volume-clone configuration"
 echo ""
 
 echo "------------------------------------------------------------------------"
