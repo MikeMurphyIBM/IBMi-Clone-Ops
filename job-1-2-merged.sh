@@ -917,6 +917,8 @@ echo "------------------------------------------------------------------------"
 echo " Stage IX Complete: Boot volume attached and marked as bootable"
 echo "------------------------------------------------------------------------"
 echo ""
+echo "Pausing for 5 minutes to ensure boot volume is attached and ready for operations"
+sleep 300
 
 ################################################################################
 # STAGE X: CONFIGURE BOOT MODE
@@ -1078,7 +1080,7 @@ echo " STAGE XIII: FINAL IBMi CONFIGURATION"
 echo "========================================================================"
 echo ""
 
-echo "→ Connecting to IBMi to re-enable autostart and flush to disk..."
+echo "→ Connecting to IBMi to re-enable primary INTNETADR for autostart and flush to disk..."
 
 ssh -i "$VSI_KEY_FILE" \
   -o StrictHostKeyChecking=no \
