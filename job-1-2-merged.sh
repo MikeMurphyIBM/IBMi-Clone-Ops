@@ -52,11 +52,11 @@ readonly API_VERSION="2024-02-28"
 # LPAR Configuration
 readonly PRIMARY_LPAR="murphy-prod"
 readonly PRIMARY_INSTANCE_ID="fea64706-1929-41c9-a761-68c43a8f29cc"
-readonly SECONDARY_LPAR="murphy-prod-clone88"
+readonly SECONDARY_LPAR="murphy-prod-clone34"
 
 # Network Configuration
 readonly SUBNET_ID="9b9c414e-aa95-41aa-8ed2-40141e0c42fd"
-readonly PRIVATE_IP="192.168.10.88"
+readonly PRIVATE_IP="192.168.10.34"
 readonly PUBLIC_SUBNET_NAME="public-net-$(date +"%Y%m%d%H%M%S")"
 readonly KEYPAIR_NAME="murph2"
 
@@ -373,9 +373,13 @@ ssh -i "$VSI_KEY_FILE" \
        -o StrictHostKeyChecking=no \
        -o UserKnownHostsFile=/dev/null \
        murphy@192.168.0.109 \
-       'rm -f /QOpenSys/var/lib/cloud/instance/boot-finished; \
+       'echo \"→ Deleting cloud-init boot-finished marker...\"; \
+        rm -f /QOpenSys/var/lib/cloud/instance/boot-finished; \
+        echo \"→ Deleting cloud-init instance-id...\"; \
         rm -f /QOpenSys/var/lib/cloud/instance/instance-id; \
+        echo \"→ Flushing ASP to disk...\"; \
         system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)\"'" || true
+
 
 echo "  ✓ IBMi preparation commands completed"
 echo ""
@@ -1078,6 +1082,10 @@ echo ""
 
 echo "→ Connecting to IBMi to re-enable primary INTNETADR for autostart and flush to disk..."
 
+# Restore primary LPAR cloud-init state after successful clone
+# - Recreate instance-id file with "primary" identifier
+# - Recreate boot-finished marker to indicate system is initialized
+# - Flush ASP to ensure all changes are written to disk
 ssh -i "$VSI_KEY_FILE" \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
@@ -1089,7 +1097,6 @@ ssh -i "$VSI_KEY_FILE" \
        'echo primary > /QOpenSys/var/lib/cloud/instance/instance-id; \
         touch /QOpenSys/var/lib/cloud/instance/boot-finished; \
         system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)\"'" || true
-
 echo "  ✓ Primary LPAR returned to pre-volume-clone configuration"
 echo ""
 
