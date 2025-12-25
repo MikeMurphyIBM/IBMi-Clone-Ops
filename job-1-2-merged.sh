@@ -1086,6 +1086,7 @@ echo "→ Connecting to IBMi to re-enable primary INTNETADR for autostart and fl
 # - Recreate instance-id file with "primary" identifier
 # - Recreate boot-finished marker to indicate system is initialized
 # - Flush ASP to ensure all changes are written to disk
+
 ssh -i "$VSI_KEY_FILE" \
   -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
@@ -1094,9 +1095,13 @@ ssh -i "$VSI_KEY_FILE" \
        -o StrictHostKeyChecking=no \
        -o UserKnownHostsFile=/dev/null \
        murphy@192.168.0.109 \
-       'echo primary > /QOpenSys/var/lib/cloud/instance/instance-id; \
-        touch /QOpenSys/var/lib/cloud/instance/boot-finished; \
-        system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)\"'" || true
+       '( mkdir -p /QOpenSys/var/lib/cloud/instance && \
+          printf \"%s\n\" primary > /QOpenSys/var/lib/cloud/instance/instance-id && \
+          touch /QOpenSys/var/lib/cloud/instance/boot-finished && \
+          system \"CHGASPACT ASPDEV(*SYSBAS) OPTION(*FRCWRT)\" )' " || true
+
+
+echo ""
 echo "  ✓ Primary LPAR returned to pre-volume-clone configuration"
 echo ""
 
