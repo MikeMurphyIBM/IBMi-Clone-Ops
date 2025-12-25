@@ -2,6 +2,7 @@
 
 ################################################################################
 # JOB 1/2 MERGED: CLONE & PROVISION IBMi LPAR
+# Version 3--attaching data volumes as well
 # Purpose: Clone volumes from primary LPAR and provision new LPAR with cloned volumes
 # Dependencies: IBM Cloud CLI, PowerVS plugin, jq, SSH keys
 ################################################################################
@@ -28,7 +29,7 @@ set -eu
 ################################################################################
 echo ""
 echo "========================================================================"
-echo " JOB 1/2 MERGED: CLONE & PROVISION IBMi LPAR"
+echo " JOB 1/2 MERGED v3: CLONE & PROVISION IBMi LPAR"
 echo " Purpose: Clone primary LPAR volumes and provision secondary LPAR"
 echo "========================================================================"
 echo ""
@@ -51,11 +52,11 @@ readonly API_VERSION="2024-02-28"
 # LPAR Configuration
 readonly PRIMARY_LPAR="murphy-prod"
 readonly PRIMARY_INSTANCE_ID="fea64706-1929-41c9-a761-68c43a8f29cc"
-readonly SECONDARY_LPAR="murphy-prod-clone50"
+readonly SECONDARY_LPAR="murphy-prod-clone69"
 
 # Network Configuration
 readonly SUBNET_ID="9b9c414e-aa95-41aa-8ed2-40141e0c42fd"
-readonly PRIVATE_IP="192.168.10.50"
+readonly PRIVATE_IP="192.168.10.69"
 readonly PUBLIC_SUBNET_NAME="public-net-$(date +"%Y%m%d%H%M%S")"
 readonly KEYPAIR_NAME="murph2"
 
@@ -836,7 +837,7 @@ echo "✓ Volume marked as bootable"
 echo ""
 
 ### DATA VOLUME ATTACHMENT - COMMENTED OUT FOR TESTING ###
-: <<'DATA_VOLUME_ATTACH'
+#: <<'DATA_VOLUME_ATTACH'
 # --- Attach data volumes individually (if any) ---
 if [[ -n "$CLONE_DATA_IDS" ]]; then
     echo "→ Attaching data volumes individually..."
@@ -911,13 +912,13 @@ echo ""
 echo "→ Pausing 300 seconds to allow system stabilization..."
 sleep 300
 echo ""
-DATA_VOLUME_ATTACH
+#DATA_VOLUME_ATTACH
 
 echo "------------------------------------------------------------------------"
 echo " Stage IX Complete: Boot volume attached and marked as bootable"
 echo "------------------------------------------------------------------------"
 echo ""
-echo "Pausing for 5 minutes to ensure boot volume is attached and ready for operations"
+echo "Pausing for 5 minutes to ensure volumes are attached and ready for operations"
 sleep 300
 
 ################################################################################
