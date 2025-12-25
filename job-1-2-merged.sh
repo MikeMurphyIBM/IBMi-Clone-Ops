@@ -399,9 +399,6 @@ echo " STAGE IV: VOLUME CLONE OPERATION"
 echo "========================================================================"
 echo ""
 
-echo "→ Waiting 15 seconds before initiating volume clone..."
-sleep 15
-echo ""
 
 echo "→ Submitting clone request..."
 echo "  Clone prefix: ${CLONE_PREFIX}"
